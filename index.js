@@ -13,16 +13,10 @@ app.get("/", (_req, res) => {
   res.send("Welcome to my instock backend!");
 });
 
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 //middleware
 app.use((req, res, next) => {
-  if (req.query.api_key !== "helloworld") {
-    return res
-      .status(401)
-      .send("Please provide an api_key as a query parameter");
-  }
-
   next();
 });
 
