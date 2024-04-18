@@ -20,12 +20,17 @@ exports.getWarehouseById = function (req, res) {
 };
 
 exports.createNewWarehouse = async function (req, res) {
-  
   // console.log(req.body);
-  if (!req.body.warehouse_name || !req.body.address
-    || !req.body.city || !req.body.country
-    || !req.body.contact_name || !req.body.contact_position
-    || !req.body.contact_phone || !req.body.contact_email) {
+  if (
+    !req.body.warehouse_name ||
+    !req.body.address ||
+    !req.body.city ||
+    !req.body.country ||
+    !req.body.contact_name ||
+    !req.body.contact_position ||
+    !req.body.contact_phone ||
+    !req.body.contact_email
+  ) {
     return res.status(400).json({
       message: "Please provide all the info for the warehouse in the request",
     });
@@ -45,5 +50,32 @@ exports.createNewWarehouse = async function (req, res) {
       message: `Unable to create new warehouse: ${error}`,
     });
   }
- 
-}
+};
+
+exports.getWarehouseInventories = function (req, res) {
+  const { id } = req.params;
+  console.log("Warehouse ID requested:", id);
+
+  knex("warehouses")
+    .where({ id })
+    .first()
+    .then((warehouse) => {
+      if (!warehouse) {
+        console.log("No warehouse found for ID:", id);
+        return res.status(404).send("Warehouse not found");
+      }
+      console.log("Warehouse found, fetching inventories...");
+      knex("inventories")
+        .where({ warehouse_id: id })
+        .select("id", "item_name", "category", "status", "quantity")
+        .then((inventories) => res.status(200).json(inventories))
+        .catch((err) => {
+          console.error("Error fetching inventories", err);
+          res.status(500).json({ error: err.message });
+        });
+    })
+    .catch((err) => {
+      console.error("Error checking warehouse", err);
+      res.status(500).json({ error: err.message });
+    });
+};
