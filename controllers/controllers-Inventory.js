@@ -1,7 +1,6 @@
 const knex = require("knex")(require("../knexfile"));
 
 exports.getAllInventoryItems = function (req, res) {
-  console.log("Fetching all inventory items");
   knex("inventories")
     .select("*")
     .then((inventories) => {
