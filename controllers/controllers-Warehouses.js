@@ -1,4 +1,5 @@
 const knex = require("knex")(require("../knexfile"));
+const helper = require("../utils/helpers");
 
 exports.getallWarehouses = function (req, res) {
   knex("warehouses")
@@ -20,14 +21,35 @@ exports.getWarehouseById = function (req, res) {
 };
 
 exports.createNewWarehouse = async function (req, res) {
-  
   // console.log(req.body);
-  if (!req.body.warehouse_name || !req.body.address
-    || !req.body.city || !req.body.country
-    || !req.body.contact_name || !req.body.contact_position
-    || !req.body.contact_phone || !req.body.contact_email) {
+  if (
+    !req.body.warehouse_name ||
+    !req.body.address ||
+    !req.body.city ||
+    !req.body.country ||
+    !req.body.contact_name ||
+    !req.body.contact_position ||
+    !req.body.contact_phone ||
+    !req.body.contact_email
+  ) {
     return res.status(400).json({
       message: "Please provide all the info for the warehouse in the request",
+    });
+  }
+
+  // Email validation
+  const email = req.body.contact_email;
+  if (!helper.validateEmail(email)) {
+      return res.status(400).json({
+        message: "Please provide valid email address",
+      });
+  }
+
+  //phone number validation
+  const phoneNumber = req.body.contact_phone;
+  if (!helper.validatePhoneNumber(phoneNumber)) {
+    return res.status(400).json({
+      message: "Please provide valid phone number",
     });
   }
 
@@ -45,5 +67,4 @@ exports.createNewWarehouse = async function (req, res) {
       message: `Unable to create new warehouse: ${error}`,
     });
   }
- 
 }
