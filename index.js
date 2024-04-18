@@ -13,23 +13,19 @@ app.get("/", (_req, res) => {
   res.send("Welcome to my instock backend!");
 });
 
-app.use(express.static('public'));
-
-//middleware
-app.use((req, res, next) => {
-  if (req.query.api_key !== "helloworld") {
-    return res
-      .status(401)
-      .send("Please provide an api_key as a query parameter");
-  }
-
-  next();
-});
-
 app.use(express.json());
 
+app.use(express.static("public"));
+
 app.use("/warehouse", warehouseRouter);
-app.use("/inventory", inventoryRouter);
+app.use("/api/warehouses", warehouseRouter);
+// app.use("/inventory", inventoryRouter);
+
+//middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send("Something broke!");
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on ${PORT}`);
