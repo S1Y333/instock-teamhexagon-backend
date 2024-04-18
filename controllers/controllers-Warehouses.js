@@ -67,7 +67,52 @@ exports.createNewWarehouse = async function (req, res) {
       message: `Unable to create new warehouse: ${error}`,
     });
   }
-};
+}
+
+exports.deleteWarehouse = async function (req, res) {
+  try {
+    const { id } = req.params;
+    
+    //find records
+     const records = await knex("warehouses").join(
+       'inventories',
+       'warehouses.id',
+       'inventories.warehouse_id'
+     ).select('inventories.id').where('warehouses.id', id);
+    
+
+    //delete inventories first
+    const inventoriesToDelete = records.map(record => 
+      knex("inventories").where({ warehouse_id: record.id }).delete());
+    
+     if (inventoriesToDelete === 0) {
+       return res
+         .status(404)
+         .json({ message: `inventory with warehouse ID ${id} not found` });
+     }
+
+    //delete warehouse
+    const warehouseRowDeleted = await knex("warehouses")
+      .where({ id })
+      .delete()
+    
+
+     if (warehouseRowDeleted === 0) {
+       return res
+         .status(404)
+         .json({ message: `Warehouse with ID ${id} not found` });
+     }
+    
+    
+     // No Content response
+     res.sendStatus(204);
+   } catch (error) {
+     res.status(500).json({
+       message: `Unable to delete warehouse: ${error}`,
+     });
+   }
+}
+;
 
 exports.getWarehouseInventories = function (req, res) {
   const { id } = req.params;
