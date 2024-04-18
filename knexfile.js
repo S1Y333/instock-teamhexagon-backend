@@ -1,5 +1,4 @@
-require('dotenv').config();
-
+require("dotenv").config();
 
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
@@ -14,5 +13,3 @@ module.exports = {
     charset: "utf8",
   },
 };
-
-
