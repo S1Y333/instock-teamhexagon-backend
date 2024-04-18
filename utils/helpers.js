@@ -16,4 +16,7 @@ exports.validatePhoneNumber =(phoneNumber)=> {
   return phoneRegex.test(phoneNumber);
 }
 
+exports.isNumber = (num) => {
+  return !isNaN(num);
+}
 
