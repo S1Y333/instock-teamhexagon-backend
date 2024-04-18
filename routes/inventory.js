@@ -6,4 +6,6 @@ router.get("/", controllersInventory.getAllInventoryItems);
 
 router.get("/:id", controllersInventory.getInventoryItemById);
 
+router.post("/", controllersInventory.createInventoryItem);
+
 module.exports = router;
