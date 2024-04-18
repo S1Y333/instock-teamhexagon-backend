@@ -7,4 +7,5 @@ router.get("/:id", controllersWarehouse.getWarehouseById);
 router.get("/:id/inventories", controllersWarehouse.getWarehouseInventories);
 router.post("/", controllersWarehouse.createNewWarehouse);
 
+
 module.exports = router;
