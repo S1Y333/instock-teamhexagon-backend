@@ -40,9 +40,9 @@ exports.createNewWarehouse = async function (req, res) {
   // Email validation
   const email = req.body.contact_email;
   if (!helper.validateEmail(email)) {
-      return res.status(400).json({
-        message: "Please provide valid email address",
-      });
+    return res.status(400).json({
+      message: "Please provide valid email address",
+    });
   }
 
   //phone number validation
@@ -67,4 +67,32 @@ exports.createNewWarehouse = async function (req, res) {
       message: `Unable to create new warehouse: ${error}`,
     });
   }
-}
+};
+
+exports.getWarehouseInventories = function (req, res) {
+  const { id } = req.params;
+  console.log("Warehouse ID requested:", id);
+
+  knex("warehouses")
+    .where({ id })
+    .first()
+    .then((warehouse) => {
+      if (!warehouse) {
+        console.log("No warehouse found for ID:", id);
+        return res.status(404).send("Warehouse not found");
+      }
+      console.log("Warehouse found, fetching inventories...");
+      knex("inventories")
+        .where({ warehouse_id: id })
+        .select("id", "item_name", "category", "status", "quantity")
+        .then((inventories) => res.status(200).json(inventories))
+        .catch((err) => {
+          console.error("Error fetching inventories", err);
+          res.status(500).json({ error: err.message });
+        });
+    })
+    .catch((err) => {
+      console.error("Error checking warehouse", err);
+      res.status(500).json({ error: err.message });
+    });
+};
