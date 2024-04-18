@@ -17,9 +17,9 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-// app.use("/warehouse", warehouseRouter);
+
 app.use("/api/warehouses", warehouseRouter);
-// app.use("/inventory", inventoryRouter);
+app.use("/api/inventories", inventoryRouter);
 
 //middleware
 app.use((err, req, res, next) => {
