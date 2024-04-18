@@ -8,4 +8,5 @@ router.get("/:id", controllersWarehouse.getWarehouseById);
 
 router.post("/", controllersWarehouse.createNewWarehouse);
 
+
 module.exports = router;
