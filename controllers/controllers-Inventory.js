@@ -1,7 +1,18 @@
+const knex = require("knex")(require("../knexfile"));
+const helper = require("../utils/helpers");
+
 exports.getAllInventoryItems = function (req, res) {
   knex("inventories")
     .join("warehouses", "inventories.warehouse_id", "=", "warehouses.id")
-    .select("inventories.*", "warehouses.warehouse_name")
+    .select(
+      "inventories.id",
+      "warehouses.warehouse_name",
+      "inventories.item_name",
+      "inventories.description",
+      "inventories.category",
+      "inventories.status",
+      "inventories.quantity"
+    )
     .then((inventories) => {
       console.log("Fetched inventories with warehouse names:", inventories);
       res.status(200).json(inventories);
@@ -22,7 +33,15 @@ exports.getInventoryItemById = function (req, res) {
     .join("warehouses", "inventories.warehouse_id", "=", "warehouses.id")
     .where("inventories.id", id)
     .first()
-    .select("inventories.*", "warehouses.warehouse_name")
+    .select(
+      "inventories.id",
+      "warehouses.warehouse_name",
+      "inventories.item_name",
+      "inventories.description",
+      "inventories.category",
+      "inventories.status",
+      "inventories.quantity"
+    )
     .then((inventory) => {
       if (inventory) {
         console.log("Fetched inventory item with warehouse name:", inventory);
