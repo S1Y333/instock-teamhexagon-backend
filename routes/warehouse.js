@@ -7,6 +7,6 @@ console.log();
 router.get("/:id", controllersWarehouse.getWarehouseById);
 
 router.post("/", controllersWarehouse.createNewWarehouse);
-
+router.delete("/:id", controllersWarehouse.deleteWarehouse);
 
 module.exports = router;
