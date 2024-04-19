@@ -124,3 +124,75 @@ exports.deleteInventoryItem = async function (req, res) {
     });
   }
 };
+
+// PUT/Edit an inventory item
+exports.updateInventoryItem = async function (req, res) {
+  const { id } = req.params;
+  const inventoryId = parseInt(id, 10);
+
+  if (isNaN(inventoryId)) {
+    return res.status(400).send("Invalid inventory ID format");
+  }
+
+  // Validate all required fields
+  const { warehouse_id, item_name, description, category, status, quantity } =
+    req.body;
+  if (
+    !warehouse_id ||
+    !item_name ||
+    !description ||
+    !category ||
+    !status ||
+    quantity == null
+  ) {
+    return res
+      .status(400)
+      .json({ message: "All fields are required and must be non-empty." });
+  }
+
+  // Check if the warehouse_id exists
+  const warehouseExists = await knex("warehouses")
+    .where({ id: warehouse_id })
+    .first();
+  if (!warehouseExists) {
+    return res.status(400).json({
+      message: "warehouse_id value does not exist in the warehouses table.",
+    });
+  }
+
+  // Validate that quantity is a number
+  if (isNaN(parseInt(quantity, 10))) {
+    return res.status(400).json({ message: "Quantity must be a number." });
+  }
+  // Check if the inventory item exists
+  const inventoryExists = await knex("inventories")
+    .where({ id: inventoryId })
+    .first();
+  if (!inventoryExists) {
+    return res.status(404).json({ message: "Inventory ID not found." });
+  }
+
+  // update the inventory item
+  try {
+    await knex("inventories")
+      .where({ id: inventoryId })
+      .update({
+        warehouse_id,
+        item_name,
+        description,
+        category,
+        status,
+        quantity: parseInt(quantity, 10),
+      });
+
+    const updatedInventory = await knex("inventories")
+      .where({ id: inventoryId })
+      .first();
+    return res.status(200).json(updatedInventory);
+  } catch (error) {
+    console.error("Error updating inventory item:", error);
+    return res
+      .status(500)
+      .json({ message: `Error updating inventory item: ${error.message}` });
+  }
+};
