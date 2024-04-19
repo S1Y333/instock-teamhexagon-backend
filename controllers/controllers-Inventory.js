@@ -1,15 +1,34 @@
 const knex = require("knex")(require("../knexfile"));
 const helper = require("../utils/helpers");
 
+function buildInventoryQuery(modifier) {
+  const query = knex("inventories")
+    .join("warehouses", "inventories.warehouse_id", "=", "warehouses.id")
+    .select(
+      "inventories.id",
+      "warehouses.warehouse_name",
+      "inventories.item_name",
+      "inventories.description",
+      "inventories.category",
+      "inventories.status",
+      "inventories.quantity"
+    );
+
+  if (modifier) {
+    modifier(query);
+  }
+
+  return query;
+}
+
 exports.getAllInventoryItems = function (req, res) {
-  knex("inventories")
-    .select("*")
+  buildInventoryQuery()
     .then((inventories) => {
       // console.log("Fetched inventories:", inventories);
       res.status(200).json(inventories);
     })
     .catch((err) => {
-      console.error("Error fetching inventories:", err);
+      console.error("Error fetching inventories with warehouse names:", err);
       res.status(500).send({ error: err.message });
     });
 };
@@ -17,17 +36,26 @@ exports.getAllInventoryItems = function (req, res) {
 exports.getInventoryItemById = function (req, res) {
   const { id } = req.params;
   const inventoryId = parseInt(id, 10);
+
   if (isNaN(inventoryId)) {
     return res.status(400).send("Invalid ID format");
   }
-  knex("inventories")
-    .where({ id: id })
-    .first()
+
+  buildInventoryQuery((query) =>
+    query.where("inventories.id", inventoryId).first()
+  )
     .then((inventory) => {
-      if (inventory) res.status(200).json(inventory);
-      else res.status(404).send("Inventory item not found");
+      if (inventory) {
+        console.log("Fetched inventory item with warehouse name:", inventory);
+        res.status(200).json(inventory);
+      } else {
+        res.status(404).send("Inventory item not found");
+      }
     })
-    .catch((err) => res.status(500).send({ error: err.message }));
+    .catch((err) => {
+      console.error("Error fetching inventory item with warehouse name:", err);
+      res.status(500).send({ error: err.message });
+    });
 };
 
 exports.createInventoryItem = async function (req, res) {
@@ -46,7 +74,9 @@ exports.createInventoryItem = async function (req, res) {
   }
 
   //check warehouse id exist
-  const warehouseRow = await knex("inventories").where({ id : req.body.warehouse_id });
+  const warehouseRow = await knex("inventories").where({
+    id: req.body.warehouse_id,
+  });
 
   if (warehouseRow === 0) {
     return res
@@ -57,11 +87,9 @@ exports.createInventoryItem = async function (req, res) {
   //if the quantity is not a number
   const quantity = req.body.quantity;
   if (!helper.isNumber(quantity)) {
-     return res
-       .status(404)
-       .json({ message: `Quantity is not a number` });
+    return res.status(404).json({ message: `Quantity is not a number` });
   }
-  
+
   try {
     const result = await knex("inventories").insert(req.body);
 
