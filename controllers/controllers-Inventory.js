@@ -59,7 +59,7 @@ exports.getInventoryItemById = function (req, res) {
 };
 
 exports.createInventoryItem = async function (req, res) {
-  // console.log(req.body);
+  console.log(req.body);
   if (
     !req.body.warehouse_id ||
     !req.body.item_name ||
