@@ -20,6 +20,8 @@ app.use(express.static("public"));
 app.use("/api/warehouses", warehouseRouter);
 app.use("/api/inventories", inventoryRouter);
 
+
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Something broke!");
