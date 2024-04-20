@@ -24,7 +24,7 @@ function buildInventoryQuery(modifier) {
 exports.getAllInventoryItems = function (req, res) {
   buildInventoryQuery()
     .then((inventories) => {
-      console.log("Fetched inventories with warehouse names:", inventories);
+      // console.log("Fetched inventories:", inventories);
       res.status(200).json(inventories);
     })
     .catch((err) => {
@@ -125,6 +125,30 @@ exports.deleteInventoryItem = async function (req, res) {
   }
 };
 
+exports.deleteInventoryItem = async function (req, res) {
+  try {
+    const { id } = req.params;
+
+    const inventoriesToDelete = await knex("inventories").where({ id }).delete();
+
+    if (inventoriesToDelete === 0) {
+      return res
+        .status(404)
+        .json({ message: `inventory with ID ${id} not found` });
+    }
+    
+
+    // No Content response
+    res.sendStatus(204);
+  } catch (error) {
+       res.status(500).json({
+         message: `Unable to delete inventory: ${error}`,
+       });
+  }
+}
+
+
+ 
 // PUT/Edit an inventory item
 exports.updateInventoryItem = async function (req, res) {
   const { id } = req.params;

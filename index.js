@@ -20,15 +20,7 @@ app.use(express.static("public"));
 app.use("/api/warehouses", warehouseRouter);
 app.use("/api/inventories", inventoryRouter);
 
-app.get("/api/categories", (req, res) => {
-  res.json([
-    { id: 1, name: "Electronics" },
-    { id: 2, name: "Apparel" },
-    { id: 3, name: "Accessories" },
-    { id: 4, name: "Furniture" },
-    { id: 5, name: "Health" },
-  ]);
-});
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
