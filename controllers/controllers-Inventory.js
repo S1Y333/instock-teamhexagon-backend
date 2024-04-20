@@ -38,6 +38,7 @@ exports.getInventoryItemById = function (req, res) {
   const inventoryId = parseInt(id, 10);
 
   if (isNaN(inventoryId)) {
+    console.error("Invalid ID format:", id);
     return res.status(400).send("Invalid ID format");
   }
 
@@ -49,6 +50,7 @@ exports.getInventoryItemById = function (req, res) {
         console.log("Fetched inventory item with warehouse name:", inventory);
         res.status(200).json(inventory);
       } else {
+        console.warn("Inventory item not found for ID:", inventoryId);
         res.status(404).send("Inventory item not found");
       }
     })
@@ -129,36 +131,34 @@ exports.deleteInventoryItem = async function (req, res) {
   try {
     const { id } = req.params;
 
-    const inventoriesToDelete = await knex("inventories").where({ id }).delete();
+    const inventoriesToDelete = await knex("inventories")
+      .where({ id })
+      .delete();
 
     if (inventoriesToDelete === 0) {
       return res
         .status(404)
         .json({ message: `inventory with ID ${id} not found` });
     }
-    
 
     // No Content response
     res.sendStatus(204);
   } catch (error) {
-       res.status(500).json({
-         message: `Unable to delete inventory: ${error}`,
-       });
+    res.status(500).json({
+      message: `Unable to delete inventory: ${error}`,
+    });
   }
-}
+};
 
-
- 
 // PUT/Edit an inventory item
 exports.updateInventoryItem = async function (req, res) {
   const { id } = req.params;
   const inventoryId = parseInt(id, 10);
 
   if (isNaN(inventoryId)) {
-    return res.status(400).send("Invalid inventory ID format");
+    return res.status(400).json({ message: "Invalid inventory ID format." });
   }
 
-  // Validate all required fields
   const { warehouse_id, item_name, description, category, status, quantity } =
     req.body;
   if (
@@ -171,7 +171,7 @@ exports.updateInventoryItem = async function (req, res) {
   ) {
     return res
       .status(400)
-      .json({ message: "All fields are required and must be non-empty." });
+      .json({ message: "All fields are required and must not be empty." });
   }
 
   // Check if the warehouse_id exists
@@ -179,15 +179,16 @@ exports.updateInventoryItem = async function (req, res) {
     .where({ id: warehouse_id })
     .first();
   if (!warehouseExists) {
-    return res.status(400).json({
-      message: "warehouse_id value does not exist in the warehouses table.",
-    });
+    return res
+      .status(400)
+      .json({ message: "The specified warehouse_id does not exist." });
   }
 
   // Validate that quantity is a number
   if (isNaN(parseInt(quantity, 10))) {
     return res.status(400).json({ message: "Quantity must be a number." });
   }
+
   // Check if the inventory item exists
   const inventoryExists = await knex("inventories")
     .where({ id: inventoryId })
@@ -196,7 +197,7 @@ exports.updateInventoryItem = async function (req, res) {
     return res.status(404).json({ message: "Inventory ID not found." });
   }
 
-  // update the inventory item
+  // Update the inventory item
   try {
     await knex("inventories")
       .where({ id: inventoryId })
@@ -212,11 +213,9 @@ exports.updateInventoryItem = async function (req, res) {
     const updatedInventory = await knex("inventories")
       .where({ id: inventoryId })
       .first();
-    return res.status(200).json(updatedInventory);
+    res.status(200).json(updatedInventory);
   } catch (error) {
     console.error("Error updating inventory item:", error);
-    return res
-      .status(500)
-      .json({ message: `Error updating inventory item: ${error.message}` });
+    res.status(500).json({ message: "Error updating inventory item." });
   }
 };
