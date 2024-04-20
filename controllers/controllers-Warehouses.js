@@ -21,7 +21,7 @@ exports.getWarehouseById = function (req, res) {
 };
 
 exports.createNewWarehouse = async function (req, res) {
-  // console.log(req.body);
+  console.log(req.body);
   if (
     !req.body.warehouse_name ||
     !req.body.address ||
