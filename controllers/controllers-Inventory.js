@@ -178,6 +178,7 @@ exports.updateInventoryItem = async function (req, res) {
   const warehouseExists = await knex("warehouses")
     .where({ id: warehouse_id })
     .first();
+  
   if (!warehouseExists) {
     return res.status(400).json({
       message: "warehouse_id value does not exist in the warehouses table.",

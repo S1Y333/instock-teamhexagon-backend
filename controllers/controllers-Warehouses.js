@@ -2,10 +2,20 @@ const knex = require("knex")(require("../knexfile"));
 const helper = require("../utils/helpers");
 
 exports.getallWarehouses = function (req, res) {
-  knex("warehouses")
-    .select("*")
-    .then((warehouses) => res.json(warehouses))
-    .catch((err) => res.status(500).json({ error: err.message }));
+  const columnName = req.query.sort_by;
+
+  if (columnName) {
+    knex("warehouses")
+      .select("*")
+      .orderBy(columnName, "desc")
+      .then((warehouses) => res.json(warehouses))
+      .catch((err) => res.status(500).json({ error: err.message }));
+  } else {
+    knex("warehouses")
+      .select("*")
+      .then((warehouses) => res.json(warehouses))
+      .catch((err) => res.status(500).json({ error: err.message }));
+  }
 };
 
 exports.getWarehouseById = function (req, res) {
@@ -136,6 +146,17 @@ exports.getWarehouseInventories = function (req, res) {
     });
 };
 exports.editWarehouse = async function (req, res) {
+  const { id } = req.params;
+  
+  knex("warehouses")
+    .where({ id })
+    .first()
+    .then((warehouse) => {
+      if (warehouse) res.json(warehouse);
+      else res.status(404).send("Warehouse not found");
+    })
+    .catch((err) => res.status(500).json({ error: err.message }));
+ 
   if (
     !req.body.warehouse_name ||
     !req.body.address ||
@@ -169,10 +190,10 @@ exports.editWarehouse = async function (req, res) {
     const result = await knex("warehouses")
       .where({ id: req.params.id })
       .update(req.body);
-    res.status(201).json(result);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({
-      message: `Unable to create new warehouse: ${error}`,
+      message: `Unable to edit a warehouse: ${error}`,
     });
   }
 };
