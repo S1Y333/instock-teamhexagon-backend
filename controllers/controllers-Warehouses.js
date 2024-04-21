@@ -3,11 +3,12 @@ const helper = require("../utils/helpers");
 
 exports.getallWarehouses = function (req, res) {
   const columnName = req.query.sort_by;
+  const orderMethod = req.query.order_by || "asc";
 
   if (columnName) {
     knex("warehouses")
       .select("*")
-      .orderBy(columnName, "desc")
+      .orderBy(columnName, orderMethod)
       .then((warehouses) => res.json(warehouses))
       .catch((err) => res.status(500).json({ error: err.message }));
   } else {
@@ -148,14 +149,14 @@ exports.getWarehouseInventories = function (req, res) {
 exports.editWarehouse = async function (req, res) {
   const { id } = req.params;
   
-  knex("warehouses")
-    .where({ id })
-    .first()
-    .then((warehouse) => {
-      if (warehouse) res.json(warehouse);
-      else res.status(404).send("Warehouse not found");
-    })
-    .catch((err) => res.status(500).json({ error: err.message }));
+  const warehouseExists = knex("warehouses").where({ id }).first();
+  
+   if (!warehouseExists) {
+     return res.status(400).json({
+       message: "warehouse_id value does not exist in the warehouses table.",
+     });
+   }
+    
  
   if (
     !req.body.warehouse_name ||
