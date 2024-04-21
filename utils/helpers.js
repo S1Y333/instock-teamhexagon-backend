@@ -19,3 +19,7 @@ exports.validatePhoneNumber = (phoneNumber) => {
 exports.isNumber = (num) => {
   return !isNaN(num);
 };
+
+exports.sortQuery = (query, sortBy, orderMethod)  => {
+  query.orderBy(sortBy, orderMethod);
+}

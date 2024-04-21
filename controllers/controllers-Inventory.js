@@ -22,7 +22,18 @@ function buildInventoryQuery(modifier) {
 }
 
 exports.getAllInventoryItems = function (req, res) {
-  buildInventoryQuery()
+  const columnName = req.query.sort_by;
+  const orderMethod = req.query.order_by || "asc";
+
+  const sortedQuery = buildInventoryQuery((query) => {
+    helper.sortQuery(query, columnName, orderMethod);
+  });
+
+  const unsortedQuery = buildInventoryQuery();
+
+  let query = columnName ? sortedQuery : unsortedQuery;
+
+  query
     .then((inventories) => {
       // console.log("Fetched inventories:", inventories);
       res.status(200).json(inventories);
@@ -129,26 +140,25 @@ exports.deleteInventoryItem = async function (req, res) {
   try {
     const { id } = req.params;
 
-    const inventoriesToDelete = await knex("inventories").where({ id }).delete();
+    const inventoriesToDelete = await knex("inventories")
+      .where({ id })
+      .delete();
 
     if (inventoriesToDelete === 0) {
       return res
         .status(404)
         .json({ message: `inventory with ID ${id} not found` });
     }
-    
 
     // No Content response
     res.sendStatus(204);
   } catch (error) {
-       res.status(500).json({
-         message: `Unable to delete inventory: ${error}`,
-       });
+    res.status(500).json({
+      message: `Unable to delete inventory: ${error}`,
+    });
   }
-}
+};
 
-
- 
 // PUT/Edit an inventory item
 exports.updateInventoryItem = async function (req, res) {
   const { id } = req.params;
@@ -178,7 +188,7 @@ exports.updateInventoryItem = async function (req, res) {
   const warehouseExists = await knex("warehouses")
     .where({ id: warehouse_id })
     .first();
-  
+
   if (!warehouseExists) {
     return res.status(400).json({
       message: "warehouse_id value does not exist in the warehouses table.",
